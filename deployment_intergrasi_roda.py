@@ -7,10 +7,8 @@ import math
 import warnings
 import struct
 import threading
-import serial
 import tensorflow as tf
 import time
-#import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 warnings.filterwarnings('ignore')
 
@@ -22,16 +20,13 @@ swidth = 2
 CHUNK = 1024
 TimeoutSignal = ((RATE / CHUNK * 1)+2)
 TEMPORARY_WAVE_FILENAME = "temp.wav"
-SAVED_MODEL_PATH = "/home/comvis/tobi/suara/zzz.h5"
+SAVED_MODEL_PATH = "model/gru.h5"
 STRING = ''
 silence = True
 Threshold = 100
 audio = pyaudio.PyAudio()
 
-ArduinoSerial=serial.Serial ('/dev/ttyUSB0',9600,timeout=0.1)
-
 class _Keyword_Spotting_Service:
-
     model = None
     _mapping = [
         "Go",
@@ -132,12 +127,16 @@ def recognise():
     print("--- Waktu Prediksi CNN : %s detik ---" % (waktu_komputasi_CNN))
     if(keyword == 'Go'): 
         STRING = "0"
+        print("GO")
     elif(keyword == 'Stop'): 
         STRING = "1"
+        print("STOP")
     elif(keyword == 'Right'): 
         STRING = "2"
+        print("RIGHT")
     elif(keyword == 'Left'): 
         STRING = "3"
+        print("LEFT")
     silence = True
 
 def listen():
@@ -145,7 +144,6 @@ def listen():
     stream = audio.open(format=FORMAT, channels=CHANNELS,
                             rate=RATE, input=True,
                             frames_per_buffer=CHUNK)
-    
     while True:
         print(silence)
         while silence:
@@ -160,19 +158,7 @@ def listen():
                 LastBlock=input
                 recording(LastBlock, stream)
             
-def spam():
-    global STRING
-    while True: 
-        ArduinoSerial.write(bytes(STRING, 'utf-8'))
-        print(ArduinoSerial.readline().decode().strip())
-        
-                    
-t2 = threading.Thread(target=spam, args=())
+                
 t1 = threading.Thread(target=listen, args=())
-
 t1.start()
-t2.start()
-
 t1.join()
-t2.join()
-    
