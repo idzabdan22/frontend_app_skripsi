@@ -29,16 +29,16 @@ audio = pyaudio.PyAudio()
 class _Keyword_Spotting_Service:
     model = None
     _mapping = [
-        "One",
-        "Two",
-        "Three",
-        "Four",
         "Five",
-        "Six",
-        "On",
+        "Four",
+        "No",
         "Off",
-        "Yes",
-        "No"
+        "On",
+        "One",
+        "Six",
+        "Three",
+        "Two",
+        "Yes"
     ]
     _instance = None
 
