@@ -9,6 +9,9 @@ import struct
 import threading
 import tensorflow as tf
 import time
+import asyncio
+import websockets
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 warnings.filterwarnings('ignore')
 
@@ -25,6 +28,7 @@ STRING = ''
 silence = True
 Threshold = 100
 audio = pyaudio.PyAudio()
+stat = False
 
 class _Keyword_Spotting_Service:
     model = None
@@ -77,7 +81,7 @@ class _Keyword_Spotting_Service:
             # extract MFCCs
             MFCCs = librosa.feature.mfcc(signal, sample_rate, n_mfcc=num_mfcc, n_fft=n_fft, hop_length=hop_length)
         return MFCCs.T
-
+    
 def Keyword_Spotting_Service():
     # ensure an instance is created only the first time the factory function is called
     if _Keyword_Spotting_Service._instance is None:
@@ -99,7 +103,7 @@ def rms(frame):
     return rms * 1000
 
 def recording(lastblock, stream):
-    global FORMAT, CHUNK, CHANNELS, RATE, TEMPORARY_WAVE_FILENAME
+    global FORMAT, CHUNK, CHANNELS, RATE, TEMPORARY_WAVE_FILENAME, silence, stat
     try:
         arr = []
         arr.append(lastblock)
@@ -116,13 +120,17 @@ def recording(lastblock, stream):
         waveFile.setframerate(RATE)
         waveFile.writeframes(b''.join(arr))
         waveFile.close()
-        recognise()
+        data = recognize()
+        silence = True
         del stream
+        return data
+        # stat = not stat
+        # return str("Yes")
     except Exception as e:
         print (e)
         raise
 
-def recognise():
+def recognize():
     global STRING
     global silence
     start_time_prediksi = time.time()
@@ -146,7 +154,7 @@ def recognise():
     #     print("LEFT")
     # elif(keyword == 'Five'):
     #     print("Five")
-
+    return keyword
     silence = True
 
 def listen():
@@ -167,8 +175,75 @@ def listen():
                 silence=False
                 LastBlock=input
                 recording(LastBlock, stream)
-            
-                
-t1 = threading.Thread(target=listen, args=())
-t1.start()
-t1.join()
+
+import logging
+from websocket_server import WebsocketServer
+import time
+
+# import asyncio
+# import websockets
+
+# async def handler(websocket):
+#     global silence, stream
+#     stream = audio.open(format=FORMAT, channels=CHANNELS,
+#                             rate=RATE, input=True,
+#                             frames_per_buffer=CHUNK)
+#     while True:
+#         print("listening")
+#         message = await websocket.recv()
+#         print(message)
+#         # global stream
+#         while silence:
+#             try:
+#                 input = stream.read(CHUNK)
+#             except:
+#                 print("error")
+#                 continue
+#             rms_value = rms(input)
+#             if (rms_value > Threshold):
+#                 silence=True
+#                 LastBlock=input
+#                 message = recording(LastBlock, stream)
+#                 websocket.send(message)
+
+
+# async def main():
+#     async with websockets.serve(handler, "localhost", 3000):
+#         await asyncio.Future()  # run forever
+
+# asyncio.run(main())
+
+# def prints(message):
+#     print(message)
+
+# Called when a client sends a message
+def message_received(client, server, message):
+    print(message)
+    if len(message) > 200:
+        message = message[:200] + '..'
+    print("Client(%d) said: %s" % (client['id'], message))
+
+def new_client(client, server):
+        global silence
+        stream = audio.open(format=FORMAT, channels=CHANNELS,
+                                rate=RATE, input=True,
+                                frames_per_buffer=CHUNK)
+        while True:
+            while silence:
+                try:
+                    print("listening")
+                    input = stream.read(CHUNK)
+                except:
+                    print("error")
+                    continue
+                rms_value = rms(input)
+                if (rms_value > Threshold):
+                    silence=True
+                    LastBlock=input
+                    message = recording(LastBlock, stream)
+                    server.send_message(client, message)
+
+server = WebsocketServer(host='127.0.0.1', port=3000, loglevel=logging.INFO)
+server.set_fn_new_client(new_client)
+server.set_fn_message_received(message_received)
+server.run_forever()
