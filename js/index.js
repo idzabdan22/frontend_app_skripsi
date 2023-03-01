@@ -32,13 +32,13 @@ ws.addEventListener("message", (event) => {
         op += 5;
       }, 75);
     }
-    state = Number(message) - 1; //1
+    state = Number(message); //1
   } else {
     if (Number(message)) {
       warning = document.querySelector(".warning");
       cols = document.querySelectorAll(".col");
       const chosen = cols[Number(message) - 1];
-      cols[state].removeChild(warning);
+      chosen.removeChild(warning);
       // const chosen = cols[0];
       if (chosen.childElementCount < 2) {
         let div = document.createElement("div");
@@ -54,115 +54,40 @@ ws.addEventListener("message", (event) => {
           op += 5;
         }, 75);
       }
-      state = Number(message) - 1;
+      state = Number(message);
     }
     else { //yes, no, on, off
       if (state) {
-        cols = document.querySelectorAll(".col");
+        chosen = document.querySelectorAll(".col");
+        console.log(chosen);
         clearInterval(blinking);
         let timesRun = 0;
         let index = 100;
         let data = 0;
         const interval = setInterval(function () {
-          if (timesRun > 3) {
+		  chosen = document.querySelectorAll(".col");
+          if (timesRun < 4) {
             clearInterval(interval);
           }
           console.log("clicked");
           data = index / 100;
           console.log(data);
-          cols[state].style.transform = `scale(${data}, ${data})`;
+          console.log(chosen[state]-1);
+          chosen[state-1].style.transform = `scale(${data}, ${data})`;
           index -= 5;
           timesRun += 1;
         }, 100);
         setTimeout(() => {
-          cols[state].style.transform = `scale(${1}, ${1})`;
+          chosen.style.transform = `scale(${1}, ${1})`;
           const mode = document.getElementById("mode");
-          mode.textContent = "Head Movement";
+          mode.textContent = "xxxxxxxxxx";
         }, 1000);
         state = null;
       }
-      console.log("NOT A NUMBER");
+      console.log("NOT A NUMBER", message);
     }
   }
-
-  // if (
-  //   (message !== "Yes" &&
-  //     message !== "No" &&
-  //     message !== "On" &&
-  //     message !== "Off") &&
-  //   !state
-  // ) {
-  //   console.log("MASUK KE WARNING");
-  //   cols = document.querySelectorAll(".col");
-  //   const chosen = cols[Number(message) - 1];
-  //   // const chosen = cols[0];
-  //   console.log(chosen);
-  //   if (chosen.childElementCount < 2) {
-  //     let div = document.createElement("div");
-  //     div.classList.add("warning");
-  //     chosen.prepend(div);
-  //     warning = document.querySelector(".warning");
-  //     op = 0;
-  //     blinking = setInterval(() => {
-  //       if (op >= 100) {
-  //         op = 0;
-  //       }
-  //       warning.style.opacity = `${op}%`;
-  //       op += 5;
-  //     }, 75);
-  //     state = chosen;
-  //   }
-  // } else {
-  //   console.log("MASUK KE CLICKED");
-
-  //   if (state) {
-  //     cols = document.querySelectorAll(".col");
-  //     cols[state].removeChild(warning);
-  //     const chosen = cols[Number(message) - 1];
-  //     // const chosen = cols[0];
-  //     console.log(chosen);
-  //     if (chosen.childElementCount < 2) {
-  //       let div = document.createElement("div");
-  //       div.classList.add("warning");
-  //       chosen.prepend(div);
-  //       warning = document.querySelector(".warning");
-  //       op = 0;
-  //       blinking = setInterval(() => {
-  //         if (op >= 100) {
-  //           op = 0;
-  //         }
-  //         warning.style.opacity = `${op}%`;
-  //         op += 5;
-  //       }, 75);
-  //       state = chosen;
-  //     }
-  //   }
-  //   if (state === "chosen") {
-  //     cols = document.querySelectorAll(".col");
-  //     // cols[0].removeChild()
-  //     cols[0].removeChild(warning);
-  //     clearInterval(blinking);
-  //     let timesRun = 0;
-  //     let index = 100;
-  //     let data = 0;
-  //     const interval = setInterval(function () {
-  //       if (timesRun > 3) {
-  //         clearInterval(interval);
-  //       }
-  //       console.log("clicked");
-  //       data = index / 100;
-  //       console.log(data);
-  //       cols[0].style.transform = `scale(${data}, ${data})`;
-  //       index -= 5;
-  //       timesRun += 1;
-  //     }, 100);
-  //     setTimeout(() => {
-  //       cols[0].style.transform = `scale(${1}, ${1})`;
-  //       const mode = document.getElementById("mode");
-  //       mode.textContent = "Head Movement";
-  //     }, 1000);
-  //     state = null;
-  //   }
+  console.log("STATE: ", state)
 });
 
 ws.addEventListener("close", (event) => {
