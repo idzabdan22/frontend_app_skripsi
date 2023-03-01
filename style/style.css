@@ -1,21 +1,21 @@
 @font-face {
     font-family: Roboto;
-    src: url('/Roboto_Slab/static/RobotoSlab-ExtraBold.ttf');
+    src: url('../Roboto_Slab/static/RobotoSlab-ExtraBold.ttf');
 }
 
 @font-face {
     font-family: Roboto_Medium;
-    src: url('/Roboto_Slab/static/RobotoSlab-Medium.ttf');
+    src: url('../Roboto_Slab/static/RobotoSlab-Medium.ttf');
 }
 
 @font-face {
     font-family: Roboto_Regular;
-    src: url('/Roboto_Slab/static/RobotoSlab-Regular.ttf');
+    src: url('../Roboto_Slab/static/RobotoSlab-Regular.ttf');
 }
 
 @font-face {
     font-family: Inter;
-    src: url('/Inter/static/Inter-Medium.ttf');
+    src: url('../Inter/static/Inter-Medium.ttf');
 }
 
 html,
@@ -37,6 +37,7 @@ body {
 .col {
     position: relative;
     background-color: #CBEEF3;
+    transform: scale(1, 1);
 }
 
 .col-main {
@@ -50,7 +51,7 @@ body {
     height: inherit; 
     background-color: #DD2D4A; 
     padding: 1.0em;
-    opacity: 100%;
+    opacity: 0%;
 }
 
 .main-content {
